@@ -1,0 +1,42 @@
+---
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          test -f app/index.html
+          test -d terraform
+          test -d scripts
+
+      - name: Check HTML file
+        run: |
+          grep -q "Terraform CI/CD Pipeline" app/index.html
+          echo "HTML validation passed"
+
+      - name: Check Terraform files
+        run: |
+          if find terraform -maxdepth 1 -name '*.tf' -print -quit | grep -q .; then
+            echo "Terraform configuration files found"
+          else
+            echo "Terraform files have not been added yet"
+          fi
