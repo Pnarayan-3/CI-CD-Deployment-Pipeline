@@ -1,0 +1,40 @@
+
+---
+name: Mock Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'app/**'
+      - 'scripts/**'
+      - '.github/workflows/deploy-mock.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mock-deployment:
+    name: Simulate Application Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy application
+        run: bash scripts/deploy.sh
+
+      - name: Run deployment health check
+        run: bash scripts/health-check.sh
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mock-deployment
+          path: mock-deployment/
+          if-no-files-found: error
