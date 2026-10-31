@@ -1,0 +1,2 @@
+New-Item -ItemType File -Force terraform/.gitkeep
+New-Item -ItemType File -Force scripts/.gitkeep
