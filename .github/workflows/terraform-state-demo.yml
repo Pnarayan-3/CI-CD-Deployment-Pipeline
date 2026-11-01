@@ -1,0 +1,41 @@
+---
+name: Terraform State Demo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  state-management:
+    name: Practice Terraform State
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Initialize Terraform
+        run: terraform init -backend=false
+
+      - name: Apply local resource
+        run: terraform apply -auto-approve -var-file=staging.tfvars
+
+      - name: List Terraform state
+        run: terraform state list
+
+      - name: Show resource state
+        run: terraform state show local_file.deployment_artifact
+
+      - name: Destroy local resource
+        run: terraform destroy -auto-approve -var-file=staging.tfvars
