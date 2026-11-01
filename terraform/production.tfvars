@@ -1,2 +1,2 @@
-app_name    = "terraform-cicd-demo"
+app_name    = "terraform-cicd-demos"
 environment = "production"
