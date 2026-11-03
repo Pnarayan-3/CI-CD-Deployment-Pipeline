@@ -1,0 +1,38 @@
+---
+name: Shell Script Quality Check
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/shellcheck.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/shellcheck.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
