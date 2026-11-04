@@ -11,6 +11,8 @@ on:
       - 'scripts/**'
       - 'terraform/**'
       - '.github/workflows/end-to-end.yml'
+      - 'tests/**'
+      - '.github/workflows/deployment-tests.yml'
 
   pull_request:
     branches:
@@ -20,6 +22,8 @@ on:
       - 'scripts/**'
       - 'terraform/**'
       - '.github/workflows/end-to-end.yml'
+      - 'tests/**'
+      - '.github/workflows/deployment-tests.yml'
 
   workflow_dispatch:
 
@@ -75,12 +79,24 @@ jobs:
           framework: terraform
           soft_fail: false
 
+  deployment-tests:
+    name: Deployment Script Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run deployment tests
+        run: bash tests/deployment-tests.sh
+  
   pr-quality-gate:
     name: PR Quality Gate
     if: github.event_name == 'pull_request'
     needs:
       - terraform-validation
       - terraform-security
+      - deployment-tests
     runs-on: ubuntu-latest
 
     steps:
@@ -93,6 +109,7 @@ jobs:
     needs:
       - terraform-validation
       - terraform-security
+      - deployment-tests
     runs-on: ubuntu-latest
 
     steps:
