@@ -47,7 +47,14 @@ test_health_check_passes() {
 
 test_health_check_detects_missing_file() {
     rm -f "$DEPLOYED_FILE"
-    bash "${ROOT_DIR}/scripts/health-check.sh"
+
+    if bash "${ROOT_DIR}/scripts/health-check.sh"; then
+        echo "Error: Health check should have failed!"
+        return 1
+    else
+        echo "Expected failure detected successfully."
+        return 0
+    fi
 }
 
 echo "Starting Deployment Script Tests"
