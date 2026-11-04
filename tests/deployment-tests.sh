@@ -29,7 +29,7 @@ run_test() {
         FAIL=$((FAIL + 1))
     fi
 
-    echo "--------------------------------"
+    echo "---------------------------------"
 }
 
 test_deployment_creates_file() {

@@ -1,5 +1,5 @@
 ---
-name: Deployment Script Tests
+name: Deployment Script Test
 
 on:
   push:
