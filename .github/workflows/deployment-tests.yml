@@ -1,0 +1,37 @@
+---
+name: Deployment Script Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/deployment-tests.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/deployment-tests.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deployment-tests:
+    name: Run Deployment Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run deployment tests
+        run: bash tests/deployment-tests.sh
