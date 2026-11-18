@@ -4,7 +4,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEPLOY_DIR="${ROOT_DIR}/mock-deployment"
-DEPLOYED_FILE="${DEPLOY_DIR}/index.html"
 
 PASS=0
 FAIL=0
@@ -29,16 +28,24 @@ run_test() {
         FAIL=$((FAIL + 1))
     fi
 
-    echo "---------------------------------"
+    echo "--------------------------------"
 }
 
-test_deployment_creates_file() {
-    bash "${ROOT_DIR}/scripts/deploy.sh"
-    test -f "$DEPLOYED_FILE"
+test_deployment_creates_versioned_artifact() {
+    APP_VERSION=1.0 BUILD_NUMBER=25 GITHUB_SHA=abcdef123456 \
+        bash "${ROOT_DIR}/scripts/deploy.sh"
+
+    test -f "${DEPLOY_DIR}/v1.0.25-abcdef1/index.html"
+}
+
+test_deployment_creates_version_file() {
+    test -f "${DEPLOY_DIR}/latest-version.txt" &&
+    grep -q "v1.0.25-abcdef1" "${DEPLOY_DIR}/latest-version.txt"
 }
 
 test_deployment_copies_correct_content() {
-    grep -q "Terraform CI/CD Pipeline" "$DEPLOYED_FILE"
+    grep -q "Terraform CI/CD Pipeline" \
+        "${DEPLOY_DIR}/v1.0.25-abcdef1/index.html"
 }
 
 test_health_check_passes() {
@@ -46,7 +53,7 @@ test_health_check_passes() {
 }
 
 test_health_check_detects_missing_file() {
-    rm -f "$DEPLOYED_FILE"
+    rm -f "${DEPLOY_DIR}/latest-version.txt"
 
     if bash "${ROOT_DIR}/scripts/health-check.sh"; then
         echo "Error: Health check should have failed!"
@@ -60,16 +67,19 @@ test_health_check_detects_missing_file() {
 echo "Starting Deployment Script Tests"
 echo "================================"
 
-run_test "Deployment creates application file" \
-    test_deployment_creates_file
+run_test "Versioned deployment artifact is created" \
+    test_deployment_creates_versioned_artifact
 
-run_test "Deployment copies correct content" \
+run_test "Latest version file is created" \
+    test_deployment_creates_version_file
+
+run_test "Correct application content is copied" \
     test_deployment_copies_correct_content
 
 run_test "Health check passes for valid deployment" \
     test_health_check_passes
 
-run_test "Health check fails when deployed file is missing" \
+run_test "Health check detects missing version file" \
     test_health_check_detects_missing_file
 
 echo ""
