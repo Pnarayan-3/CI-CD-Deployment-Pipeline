@@ -1,15 +1,15 @@
-# Terraform working directory
+# Terraform
 **/.terraform/*
-
-# Terraform state files
 *.tfstate
 *.tfstate.*
-
-# Terraform plan files
 *.tfplan
-
-# Terraform crash logs
 crash.log
 
-# Generated deployment files
+# Generated deployment artifacts
+mock-deployment/
 terraform/deployment-*.html
+
+# Environment secrets
+.env
+.env.*
+!.env.example
