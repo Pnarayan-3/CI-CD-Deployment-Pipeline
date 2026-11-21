@@ -150,17 +150,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Create a previous release for rollback simulation.
+      - name: Prepare previous release
+        run: |
+          mkdir -p mock-deployment/v1.0.0-previous
+          echo "Previous working release" > mock-deployment/v1.0.0-previous/index.html
+
       - name: Deploy application
+        id: deploy
         run: bash scripts/deploy.sh
         env:
           APP_VERSION: "1.0"
           BUILD_NUMBER: ${{ github.run_number }}
           GITHUB_SHA: ${{ github.sha }}
 
-      - name: Run health check
+      - name: Run deployment health check
+        id: health-check
         run: bash scripts/health-check.sh
 
+      - name: Rollback on deployment failure
+        if: failure() && steps.deploy.outcome == 'success'
+        run: bash scripts/rollback.sh
+
       - name: Upload versioned deployment artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: application-${{ github.run_number }}
