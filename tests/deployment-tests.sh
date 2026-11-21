@@ -93,3 +93,31 @@ if [[ "$FAIL" -gt 0 ]]; then
 fi
 
 echo "All deployment tests passed!"
+
+test_rollback_restores_previous_release() {
+    echo "Testing rollback..."
+
+    mkdir -p "${DEPLOY_DIR}/v1.0.10-old"
+    mkdir -p "${DEPLOY_DIR}/v1.0.11-new"
+
+    echo "Old release" > "${DEPLOY_DIR}/v1.0.10-old/index.html"
+    echo "New release" > "${DEPLOY_DIR}/v1.0.11-new/index.html"
+
+    # Mark the newer release as currently deployed.
+    echo "v1.0.11-new" > "${DEPLOY_DIR}/latest-version.txt"
+
+    # Ensure the old release is the most recently modified candidate.
+    sleep 1
+    touch "${DEPLOY_DIR}/v1.0.10-old/index.html"
+
+    bash "${ROOT_DIR}/scripts/rollback.sh"
+
+    ACTUAL_VERSION="$(cat "${DEPLOY_DIR}/latest-version.txt")"
+
+    if [[ "$ACTUAL_VERSION" == "v1.0.10-old" ]]; then
+        echo "Rollback test passed!"
+    else
+        echo "Rollback test failed!"
+        return 1
+    fi
+}
