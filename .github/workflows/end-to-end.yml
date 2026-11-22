@@ -179,3 +179,30 @@ jobs:
           name: application-${{ github.run_number }}
           path: mock-deployment/
           if-no-files-found: error
+
+      - name: Generate deployment summary
+        if: always()
+        env:
+          DEPLOYMENT_ENV: staging
+          DEPLOYMENT_STATUS: ${{ job.status }}
+          DEPLOYMENT_VERSION: v1.0.${{ github.run_number }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: bash scripts/deployment-summary.sh
+
+      - name: Publish GitHub Actions summary
+        if: always()
+        env:
+          DEPLOYMENT_ENV: staging
+          DEPLOYMENT_STATUS: ${{ job.status }}
+          DEPLOYMENT_VERSION: v1.0.${{ github.run_number }}
+        run: |
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Environment | $DEPLOYMENT_ENV |"
+            echo "| Status | $DEPLOYMENT_STATUS |"
+            echo "| Version | $DEPLOYMENT_VERSION |"
+            echo "| Commit | $GITHUB_SHA |"
+          } >> "$GITHUB_STEP_SUMMARY"
