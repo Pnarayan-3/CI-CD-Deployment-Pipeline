@@ -150,7 +150,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Create a previous release for rollback simulation.
+      # release for rollback simulation.
       - name: Prepare previous release
         run: |
           mkdir -p mock-deployment/v1.0.0-previous
@@ -206,3 +206,47 @@ jobs:
             echo "| Version | $DEPLOYMENT_VERSION |"
             echo "| Commit | $GITHUB_SHA |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  pipeline-summary:
+    name: Pipeline Execution Summary
+    if: always()
+    needs:
+      - terraform-validation
+      - terraform-security
+      - deployment-tests
+      - pr-quality-gate
+      - production-deployment
+      - mock-deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate pipeline summary
+        env:
+          VALIDATION_STATUS: ${{ needs.terraform-validation.result }}
+          SECURITY_STATUS: ${{ needs.terraform-security.result }}
+          TEST_STATUS: ${{ needs.deployment-tests.result }}
+          PR_STATUS: ${{ needs.pr-quality-gate.result }}
+          PRODUCTION_STATUS: ${{ needs.production-deployment.result }}
+          MOCK_STATUS: ${{ needs.mock-deployment.result }}
+        run: |
+          {
+            echo "## CI/CD Pipeline Execution Summary"
+            echo ""
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| Terraform Validation | $VALIDATION_STATUS |"
+            echo "| Security Scan | $SECURITY_STATUS |"
+            echo "| Deployment Tests | $TEST_STATUS |"
+            echo "| PR Quality Gate | $PR_STATUS |"
+            echo "| Production Deployment | $PRODUCTION_STATUS |"
+            echo "| Mock Deployment | $MOCK_STATUS |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record execution time
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Execution Information" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Workflow: $GITHUB_WORKFLOW" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Run number: $GITHUB_RUN_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: ${GITHUB_SHA:0:7}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Trigger: $GITHUB_EVENT_NAME" >> "$GITHUB_STEP_SUMMARY"
