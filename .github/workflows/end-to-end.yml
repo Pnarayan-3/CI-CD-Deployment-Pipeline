@@ -179,6 +179,7 @@ jobs:
           name: application-${{ github.run_number }}
           path: mock-deployment/
           if-no-files-found: error
+          retention-days: 7
 
       - name: Generate deployment summary
         if: always()
@@ -250,3 +251,27 @@ jobs:
           echo "- Run number: $GITHUB_RUN_NUMBER" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: ${GITHUB_SHA:0:7}" >> "$GITHUB_STEP_SUMMARY"
           echo "- Trigger: $GITHUB_EVENT_NAME" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Capture deployment failure diagnostics
+        if: failure()
+        run: |
+          echo "## Deployment Failure Diagnostics" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          echo "### Current deployment version" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f mock-deployment/latest-version.txt ]]; then
+            cat mock-deployment/latest-version.txt >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No deployment version found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Deployment directory contents" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ -d mock-deployment ]]; then
+            find mock-deployment -maxdepth 3 -type f \
+              >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Deployment directory does not exist." \
+              >> "$GITHUB_STEP_SUMMARY"
+          fi
