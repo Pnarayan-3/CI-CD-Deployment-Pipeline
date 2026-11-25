@@ -13,6 +13,7 @@ on:
       - '.github/workflows/end-to-end.yml'
       - 'tests/**'
       - '.github/workflows/deployment-tests.yml'
+      - '.github/workflows/release.yml'
 
   pull_request:
     branches:
@@ -24,6 +25,7 @@ on:
       - '.github/workflows/end-to-end.yml'
       - 'tests/**'
       - '.github/workflows/deployment-tests.yml'
+      - '.github/workflows/release.yml'
 
   workflow_dispatch:
 
