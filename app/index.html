@@ -1,15 +1,642 @@
-# Terraform CI/CD Deployment
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevOps CI/CD Demo Pipeline </title>
+    <meta name="theme-color" content="#0b1120">
+    <title>DeployFlow | CI/CD Deployment Pipeline</title>
+
+    <style>
+        :root {
+            --bg: #0b1120;
+            --surface: #111b2e;
+            --surface-light: #17243a;
+            --text: #e8eef8;
+            --muted: #94a3b8;
+            --green: #36d399;
+            --blue: #60a5fa;
+            --border: rgba(148, 163, 184, 0.16);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .container {
+            width: min(1120px, 90%);
+            margin: auto;
+        }
+
+        /* Navigation */
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(11, 17, 32, 0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-content {
+            height: 72px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--green);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: var(--green);
+        }
+
+        .github-link {
+            padding: 9px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        /* Hero */
+
+        .hero {
+            padding: 105px 0 85px;
+            text-align: center;
+            background:
+                radial-gradient(ellipse at 50% 0%,
+                rgba(54, 211, 153, 0.12), transparent 55%);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 7px 13px;
+            border: 1px solid rgba(54, 211, 153, 0.3);
+            border-radius: 30px;
+            color: var(--green);
+            font-size: 12px;
+            margin-bottom: 25px;
+        }
+
+        .dot {
+            height: 7px;
+            width: 7px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--green);
+        }
+
+        h1 {
+            font-size: clamp(38px, 6vw, 66px);
+            line-height: 1.12;
+            letter-spacing: -2.5px;
+            max-width: 850px;
+            margin: 0 auto 22px;
+        }
+
+        h1 span {
+            color: var(--green);
+        }
+
+        .hero-description {
+            color: var(--muted);
+            max-width: 650px;
+            margin: auto;
+            font-size: 16px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 21px;
+            border-radius: 8px;
+            font-weight: 650;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: #071a15;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(54, 211, 153, 0.2);
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+        }
+
+        /* General sections */
+
+        section {
+            padding: 75px 0;
+        }
+
+        .section-heading {
+            margin-bottom: 34px;
+        }
+
+        .section-heading h2 {
+            font-size: 30px;
+            letter-spacing: -1px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        /* Pipeline */
+
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .pipeline-card {
+            padding: 23px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            transition: 0.2s;
+        }
+
+        .pipeline-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(54, 211, 153, 0.4);
+        }
+
+        .stage-number {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .pipeline-card h3 {
+            margin: 12px 0 7px;
+            font-size: 17px;
+        }
+
+        .pipeline-card p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* Technology stack */
+
+        .tech-section {
+            background: rgba(17, 27, 46, 0.55);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 13px;
+        }
+
+        .tech-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tech-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        /* Environments */
+
+        .environment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .environment-card {
+            padding: 22px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .environment-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .environment-card p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .environment-label {
+            display: inline-block;
+            font-size: 11px;
+            margin-top: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(54, 211, 153, 0.1);
+            color: var(--green);
+        }
+
+        /* Architecture */
+
+        .architecture {
+            padding: 28px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .architecture-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .architecture-node {
+            padding: 14px 17px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .arrow {
+            color: var(--green);
+            font-size: 20px;
+        }
+
+        /* Footer */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 0;
+            color: var(--muted);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        footer strong {
+            color: var(--green);
+        }
+
+        @media (max-width: 750px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 75px 0;
+            }
+
+            .pipeline-grid,
+            .environment-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tech-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pipeline-grid,
+            .environment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-description {
+                font-size: 14px;
+            }
+
+            .section-heading h2 {
+                font-size: 25px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Terraform CI/CD Pipeline </h1>
-    <p>Deployment managed through GitHub Actions.</p>
-    <p>Status: Application is ready.</p>
+
+    <nav>
+        <div class="container nav-content">
+            <a href="#" class="logo">Deploy<span>Flow.</span></a>
+
+            <div class="nav-links">
+                <a href="#pipeline">Pipeline</a>
+                <a href="#technology">Technology</a>
+                <a href="#environments">Environments</a>
+                <a href="#architecture">Architecture</a>
+            </div>
+
+            <a
+                href="https://github.com/Pnarayan-3/CI-CD-Deployment-Pipeline"
+                class="github-link"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                View on GitHub ↗
+            </a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <div class="eyebrow">
+                <span class="dot"></span>
+                AUTOMATED DEVOPS WORKFLOW
+            </div>
+
+            <h1>
+                From Code to <span>Deployment.</span>
+                Automatically.
+            </h1>
+
+            <p class="hero-description">
+                A practical CI/CD deployment pipeline built with
+                GitHub Actions, Terraform, Docker and automation.
+                Designed to validate, test, secure and deploy
+                applications through a structured workflow.
+            </p>
+
+            <div class="hero-buttons">
+                <a
+                    href="https://github.com/Pnarayan-3/CI-CD-Deployment-Pipeline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-primary"
+                >
+                    Explore Project ↗
+                </a>
+
+                <a href="#pipeline" class="btn btn-secondary">
+                    Explore Pipeline ↓
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="pipeline">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Inside the Pipeline</h2>
+                    <p>
+                        A structured workflow covering the complete
+                        application delivery lifecycle.
+                    </p>
+                </div>
+
+                <div class="pipeline-grid">
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 01</span>
+                        <h3>Code & Version Control</h3>
+                        <p>
+                            Git-based source control, feature branches
+                            and pull request workflows.
+                        </p>
+                    </article>
+
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 02</span>
+                        <h3>Continuous Integration</h3>
+                        <p>
+                            Automated validation, formatting checks
+                            and quality gates.
+                        </p>
+                    </article>
+
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 03</span>
+                        <h3>Security Scanning</h3>
+                        <p>
+                            Infrastructure configuration analysis
+                            using Checkov and quality checks.
+                        </p>
+                    </article>
+
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 04</span>
+                        <h3>Infrastructure as Code</h3>
+                        <p>
+                            Terraform validation, planning,
+                            environment configuration and state management.
+                        </p>
+                    </article>
+
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 05</span>
+                        <h3>Containerization</h3>
+                        <p>
+                            Package the application into a portable
+                            Docker image.
+                        </p>
+                    </article>
+
+                    <article class="pipeline-card">
+                        <span class="stage-number">STAGE 06</span>
+                        <h3>Deployment & Recovery</h3>
+                        <p>
+                            Automated deployment, health checks,
+                            release versioning and rollback simulation.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="tech-section" id="technology">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Technology Stack</h2>
+                    <p>
+                        Tools and technologies used across the project.
+                    </p>
+                </div>
+
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        GitHub Actions
+                        <span>CI/CD Automation</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Terraform
+                        <span>Infrastructure as Code</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Docker
+                        <span>Containerization</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Bash
+                        <span>Deployment Automation</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Checkov
+                        <span>Infrastructure Security</span>
+                    </div>
+
+                    <div class="tech-item">
+                        ShellCheck
+                        <span>Shell Script Quality</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Nginx
+                        <span>Web Server</span>
+                    </div>
+
+                    <div class="tech-item">
+                        Git
+                        <span>Version Control</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="environments">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Deployment Environments</h2>
+                    <p>
+                        Environment-specific configuration
+                        for controlled application delivery.
+                    </p>
+                </div>
+
+                <div class="environment-grid">
+                    <article class="environment-card">
+                        <h3>Development</h3>
+                        <p>
+                            Initial validation and development
+                            deployment workflows.
+                        </p>
+                        <span class="environment-label">Development</span>
+                    </article>
+
+                    <article class="environment-card">
+                        <h3>Staging</h3>
+                        <p>
+                            Pre-production testing and deployment
+                            verification.
+                        </p>
+                        <span class="environment-label">Staging</span>
+                    </article>
+
+                    <article class="environment-card">
+                        <h3>Production</h3>
+                        <p>
+                            Controlled deployment with GitHub
+                            Environment approval.
+                        </p>
+                        <span class="environment-label">Approval Required</span>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture">
+            <div class="container">
+                <div class="section-heading">
+                    <h2>Pipeline Architecture</h2>
+                    <p>
+                        A simplified view of the application delivery flow.
+                    </p>
+                </div>
+
+                <div class="architecture">
+                    <div class="architecture-flow">
+                        <div class="architecture-node">Git Push</div>
+                        <span class="arrow">→</span>
+                        <div class="architecture-node">GitHub Actions</div>
+                        <span class="arrow">→</span>
+                        <div class="architecture-node">Validation</div>
+                        <span class="arrow">→</span>
+                        <div class="architecture-node">Docker Build</div>
+                        <span class="arrow">→</span>
+                        <div class="architecture-node">Deployment</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            Built as a hands-on DevOps project by
+            <strong>Pushkar Narayan</strong>.
+            <br>
+            CI/CD Deployment Pipeline · 2026
+        </div>
+    </footer>
+
 </body>
 </html>

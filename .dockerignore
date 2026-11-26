@@ -1,0 +1,10 @@
+.git
+.github
+.terraform
+terraform
+mock-deployment
+tests
+*.tfstate
+*.tfstate.*
+.env
+.env.*
