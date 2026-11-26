@@ -15,6 +15,7 @@ on:
       - '.github/workflows/deployment-tests.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/changelog.yml'      
+      - '.github/workflows/docker-ci.yml'      
 
   pull_request:
     branches:
@@ -27,7 +28,8 @@ on:
       - 'tests/**'
       - '.github/workflows/deployment-tests.yml'
       - '.github/workflows/release.yml'
-      - '.github/workflows/changelog.yml' 
+      - '.github/workflows/changelog.yml'
+      - '.github/workflows/docker-ci.yml'       
 
   workflow_dispatch:
 
