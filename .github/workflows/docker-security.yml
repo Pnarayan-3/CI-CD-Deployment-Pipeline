@@ -1,0 +1,52 @@
+---
+name: Docker Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'app/**'
+      - '.github/workflows/docker-security.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'app/**'
+      - '.github/workflows/docker-security.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-security:
+    name: Scan Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build --pull \
+            -t terraform-cicd-demo:security-scan \
+            .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: terraform-cicd-demo:security-scan
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
